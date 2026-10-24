@@ -37,10 +37,17 @@ const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) return callback(null, true);
+      // Allow all origins in dev/tunnel mode or if no origin (mobile app, curl)
+      if (!origin || process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
       const cleanOrigin = origin.replace(/\/$/, '');
-      if (allowedOrigins.includes(cleanOrigin) || /\.vercel\.app$/.test(cleanOrigin)) {
+      if (
+        allowedOrigins.includes(cleanOrigin) ||
+        /\.vercel\.app$/.test(cleanOrigin) ||
+        /\.trycloudflare\.com$/.test(cleanOrigin) ||
+        /\.loca\.lt$/.test(cleanOrigin)
+      ) {
         return callback(null, true);
       }
       callback(new Error(`CORS: Origin ${origin} is not allowed.`));
