@@ -16,7 +16,8 @@
     "test": "npm run test --workspace=server && npm run test --workspace=client",
     "test:server": "npm run test --workspace=server",
     "test:client": "npm run test --workspace=client",
-    "install:all": "npm install && npm install --workspace=client && npm install --workspace=server"
+    "install:all": "npm install && npm install --workspace=client && npm install --workspace=server",
+    "tunnel": "cloudflared tunnel --url http://localhost:5173"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
