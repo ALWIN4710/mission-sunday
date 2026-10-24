@@ -1,0 +1,42 @@
+version: "3.9"
+
+# ============================================================
+# Mission Sunday — Local Development with Docker
+# NOTE: MongoDB replica set is required for multi-document
+#       transactions (used in sale checkout). This compose
+#       spins up a single-node replica set called "rs0".
+# ============================================================
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: mission-sunday-mongo
+    restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: |
+        mongosh --eval "try { rs.status() } catch(e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }"
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: mission-sunday-mongo-express
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+      ME_CONFIG_BASICAUTH: "false"
+
+volumes:
+  mongo-data:
