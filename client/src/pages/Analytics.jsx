@@ -415,13 +415,25 @@ function SalesTrendsTab({ trend, loading }) {
 function ProductsTab({ products, categories, loading }) {
   if (loading) return <LoadingSpinner size="lg" className="mt-16" />;
 
-  const prodList = (products || []).map((p, i) => ({
-    rank:     i + 1,
-    name:     p.name || p.productName || p._id,
-    category: p.category,
-    units:    p.units || p.unitsSold || 0,
-    revenue:  p.revenue || p.totalRevenuePaise || 0,
-  }));
+  const prodList = (products || []).map((p, i) => {
+    let name = 'Unnamed Product';
+    if (typeof p.name === 'string' && p.name) name = p.name;
+    else if (typeof p.productName === 'string' && p.productName) name = p.productName;
+    else if (typeof p._id === 'object' && p._id?.name) name = p._id.name;
+    else if (typeof p._id === 'string' && p._id) name = p._id;
+
+    let category = 'General';
+    if (typeof p.category === 'string' && p.category) category = p.category;
+    else if (typeof p._id === 'object' && p._id?.category) category = p._id.category;
+
+    return {
+      rank:     i + 1,
+      name,
+      category,
+      units:    p.units || p.unitsSold || 0,
+      revenue:  p.revenue || p.totalRevenuePaise || 0,
+    };
+  });
 
   const totalRevenue = prodList.reduce((s, p) => s + p.revenue, 0);
 

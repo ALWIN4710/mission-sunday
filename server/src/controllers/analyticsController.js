@@ -76,7 +76,7 @@ const getCategoryAnalytics = catchAsync(async (req, res) => {
 
 /** GET /api/v1/analytics/products — Top products */
 const getProductAnalytics = catchAsync(async (req, res) => {
-  const { startDate, endDate, limit = 20 } = req.query;
+  const { startDate, endDate, limit = 50 } = req.query;
   const match = saleMatch(startDate, endDate);
 
   const data = await Sale.aggregate([
@@ -90,7 +90,19 @@ const getProductAnalytics = catchAsync(async (req, res) => {
         units: { $sum: '$items.quantity' },
       },
     },
-    { $addFields: { profit: { $subtract: ['$revenue', '$cogs'] } } },
+    {
+      $project: {
+        _id: '$_id.productId',
+        productId: '$_id.productId',
+        name: '$_id.name',
+        flavour: '$_id.flavour',
+        category: '$_id.category',
+        revenue: 1,
+        cogs: 1,
+        units: 1,
+        profit: { $subtract: ['$revenue', '$cogs'] },
+      },
+    },
     { $sort: { revenue: -1 } },
     { $limit: Number(limit) },
   ]);
