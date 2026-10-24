@@ -4,10 +4,11 @@ const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { createAuditLog } = require('../middleware/auditLogger');
 
+const isProd = process.env.NODE_ENV === 'production';
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.COOKIE_SECURE === 'true',
-  sameSite: process.env.COOKIE_SAME_SITE || 'lax',
+  secure: isProd || process.env.COOKIE_SECURE === 'true',
+  sameSite: isProd ? 'none' : (process.env.COOKIE_SAME_SITE || 'lax'),
   maxAge: 8 * 60 * 60 * 1000, // 8 hours
 };
 

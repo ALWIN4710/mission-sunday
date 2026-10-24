@@ -7,6 +7,15 @@ const api = axios.create({
   timeout: 15000,
 });
 
+// Request interceptor: attach bearer token if available
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('jwt_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Response interceptor: on 401, redirect to login
 api.interceptors.response.use(
   (response) => response,
